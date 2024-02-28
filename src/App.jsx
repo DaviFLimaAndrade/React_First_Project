@@ -2,6 +2,8 @@ import { useState } from 'react'
 import "./App.css"
 import Todo from "./components/Todo"
 import TodoForm from './components/TodoForm'
+import Search from './components/search'
+import Filter from './components/filter'
 
 function App() {
   const [todos, setTodos] = useState([{
@@ -22,11 +24,14 @@ function App() {
     category: "Estudos",
     isComplete: false,
   },
-  ]) 
+  ])
+  const [search, setSearch] = useState("")
+  const [filter, setFilter] = useState("all")
+  const [sort, setSort] = useState("Asc")
 
   const addTodo = (text, category) => {
 
-    const newTodos = [...todos,{
+    const newTodos = [...todos, {
       id: Math.floor(Math.random() * 10000),
       text,
       category,
@@ -39,32 +44,43 @@ function App() {
   const removeTodo = (id) => {
     const newTodos = [...todos]
     const filteredtodos = newTodos.filter((todo) =>
-    todo.id !== id ? todo : null
+      todo.id !== id ? todo : null
     );
     setTodos(filteredtodos)
   };
-  
+
   const completeTodo = (id) => {
     const newTodos = [...todos];
-    newTodos.map((todo) => 
-    todo.id === id ? todo.isComplete = !todo.isComplete : todo
-    );
-    setTodos(newTodos);
+    const test = newTodos.map((todo) =>
+      todo.id === id ? {
+        id: todo.id,
+        text: todo.text,
+        category: todo.category,
+        isComplete: !todo.isComplete
+      } : todo);
+    console.log(test)
+    setTodos(test);
+
   };
 
   return <div className="app">
-  <h1>Lista de tarefas</h1>
-  <div className="todo-list">
-    {todos.map((todo)=>(
-      <Todo key={todo.id} todo={todo} removeTodo={removeTodo} completeTodo={completeTodo}/>
-    ))}
+    <h1>Lista de tarefas</h1>
+    <Search search={search} setSearch={setSearch} />
+    <Filter filter={filter} setFilter={setFilter} setSort={setSort}/>
+    <div className="todo-list">
+      {todos
+      .filter((todo) => filter === 'all'? true : filter === 'Completed' ? todo.isComplete: !todo.isComplete)
+      .sort((a,b) => sort === "Asc" ? a.text.localeCompare(b.text) : b.text.localeCompare(a.text))
+      .filter((todo) => todo.text.toLowerCase().includes(search.toLowerCase())
+      )
+        .map((todo) => (
+          <Todo key={todo.id} todo={todo} removeTodo={removeTodo} completeTodo={completeTodo} />
+        ))}
+    </div>
+    <TodoForm addTodo={addTodo} />
   </div>
-  <TodoForm addTodo={addTodo}/>
-</div>
 }
 
-// 42:02 / 1:02:43
-// https://www.youtube.com/watch?v=YVEVrigByKY
 
 
 export default App
